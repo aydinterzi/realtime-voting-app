@@ -4,6 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import MaxWidthWrapper from "./MaxWidthWrapper";
 import ModeToggle from "./DarkModeToggle";
+import { SignedIn, SignedOut, SignInButton, UserButton } from "@clerk/nextjs";
 
 export default function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -34,6 +35,12 @@ export default function Header() {
             <div>
               <ModeToggle />
             </div>
+            <SignedOut>
+              <SignInButton />
+            </SignedOut>
+            <SignedIn>
+              <UserButton />
+            </SignedIn>
           </nav>
 
           <div className="md:hidden">
