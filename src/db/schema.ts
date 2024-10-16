@@ -1,3 +1,4 @@
+import { sql } from "drizzle-orm";
 import {
   pgTable,
   varchar,
@@ -10,11 +11,13 @@ import {
 export const votingSessions = pgTable("voting_sessions", {
   id: uuid().defaultRandom().primaryKey(),
   title: varchar("title", { length: 255 }).notNull(),
-  creatorId: uuid("creator_id").notNull(), // Clerk tarafından sağlanan kullanıcı ID
+  creatorId: varchar("creator_id").notNull(), // Clerk tarafından sağlanan kullanıcı ID
   duration: integer("duration").notNull(), // Süre dakika cinsinden
   candidateCount: integer("candidate_count").notNull(), // Aday sayısı
   createdAt: timestamp("created_at").defaultNow().notNull(),
-  expiresAt: timestamp("expires_at").notNull(),
+  expiresAt: timestamp("expires_at", { mode: "date" })
+    .generatedAlwaysAs(sql`created_at + (duration * interval '1 minute')`)
+    .notNull(),
   isActive: boolean("is_active").default(true).notNull(), // Oylamanın aktif olup olmadığını belirtir
 });
 
@@ -24,7 +27,6 @@ export const candidates = pgTable("candidates", {
     .references(() => votingSessions.id, { onDelete: "cascade" })
     .notNull(), // Oylama oturumuyla ilişkilendirilen aday
   name: varchar("name", { length: 255 }).notNull(),
-  createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
 export const votes = pgTable("votes", {
