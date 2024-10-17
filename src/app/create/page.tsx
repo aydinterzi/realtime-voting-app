@@ -35,7 +35,7 @@ export default function CreateVotingSession() {
       .returning({
         id: votingSessions.id, // Eklenen oturumun ID'sini geri döndürüyoruz
       });
-    console.log(session);
+
     const sessionId = session[0].id; // Eklenen session ID'sini al
     const candidateData = candidateList.map((name) => ({
       sessionId, // Oturumun ID'si

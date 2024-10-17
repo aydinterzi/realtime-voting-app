@@ -4,6 +4,7 @@ import io from "socket.io-client";
 import { db } from "@/db"; // Drizzle bağlantısı
 import { candidates } from "@/db/schema"; // Candidates tablosu
 import { eq } from "drizzle-orm";
+import { useUser } from "@clerk/nextjs";
 
 let socket;
 
@@ -11,7 +12,8 @@ export default function VotingSession({ params }: { params: { id: string } }) {
   const [candidateList, setCandidateList] = useState([]);
   const [votes, setVotes] = useState({});
   const { id } = params;
-  // Drizzle ile veritabanından adayları çekme
+  const { user } = useUser();
+
   useEffect(() => {
     if (!id) return;
 
@@ -49,7 +51,7 @@ export default function VotingSession({ params }: { params: { id: string } }) {
   // Oy kullanma işlemi
   const handleVote = (candidateId) => {
     // Sunucuya oy kullanma isteği gönder
-    socket.emit("castVote", { sessionId: id, candidateId });
+    socket.emit("castVote", { sessionId: id, candidateId, userId: user.id });
   };
 
   return (

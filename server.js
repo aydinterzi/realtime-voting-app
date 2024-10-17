@@ -1,8 +1,8 @@
 import { createServer } from "node:http";
 import next from "next";
 import { Server } from "socket.io";
-import { db } from "./src/db"; // Drizzle bağlantısı
-import { votes } from "./src/db/schema"; // Oylar ve adaylar tablosu
+import { db } from "./src/db/index.js"; // Drizzle bağlantısı
+import { votes } from "./src/db/schema.js"; // Oylar ve adaylar tablosu
 
 const dev = process.env.NODE_ENV !== "production";
 const hostname = "localhost";
@@ -27,11 +27,11 @@ app.prepare().then(() => {
     });
 
     // Oy kullanma işlemi
-    socket.on("castVote", async ({ sessionId, candidateId }) => {
-      // Veritabanında oylamayı kaydetme işlemi
+    socket.on("castVote", async ({ sessionId, candidateId, userId }) => {
       await db.insert(votes).values({
         sessionId,
         candidateId,
+        userId,
         createdAt: new Date(),
       });
 

@@ -5,7 +5,6 @@ import MaxWidthWrapper from "@/components/MaxWidthWrapper";
 
 const HomePage = async () => {
   const sessions = await db.select().from(votingSessions);
-  console.log(sessions);
   return (
     <MaxWidthWrapper className="mt-8">
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">

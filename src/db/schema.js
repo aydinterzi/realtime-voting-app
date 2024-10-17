@@ -37,6 +37,6 @@ export const votes = pgTable("votes", {
   candidateId: uuid("candidate_id")
     .references(() => candidates.id, { onDelete: "cascade" })
     .notNull(), // Oy verilen aday
-  userId: uuid("user_id").notNull(), // Clerk tarafından sağlanan kullanıcı ID
+  userId: varchar("user_id").notNull(), // Clerk tarafından sağlanan kullanıcı ID
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
