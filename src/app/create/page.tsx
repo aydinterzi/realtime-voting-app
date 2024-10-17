@@ -6,10 +6,8 @@ import { db } from "@/db";
 import { candidates, votingSessions } from "@/db/schema";
 export default function CreateVotingSession() {
   const { user } = useUser();
-
   const [candidateCount, setCandidateCount] = useState(1);
   const [candidateList, setCandidateList] = useState([""]);
-
   // Aday sayısını arttırınca veya azaltınca inputları güncellemek
   const handleCandidateCountChange = (e) => {
     const count = parseInt(e.target.value, 10);

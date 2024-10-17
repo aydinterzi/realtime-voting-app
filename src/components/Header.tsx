@@ -20,17 +20,8 @@ export default function Header() {
           <Link href="/">LOGO</Link>
 
           <nav className="hidden md:flex space-x-6 items-center">
-            <Link
-              href="/projects"
-              className="text-gray-600 hover:text-blue-600"
-            >
-              Projeler
-            </Link>
-            <Link
-              href="/messages"
-              className="text-gray-600 hover:text-blue-600"
-            >
-              Mesajlar
+            <Link href="/" className="text-gray-600 hover:text-blue-600">
+              Sessions
             </Link>
             <div>
               <ModeToggle />
