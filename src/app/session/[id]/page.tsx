@@ -2,22 +2,42 @@
 import { useState, useEffect } from "react";
 import io from "socket.io-client";
 import { db } from "@/db"; // Drizzle bağlantısı
-import { candidates } from "@/db/schema"; // Candidates tablosu
+import { candidates, votingSessions } from "@/db/schema"; // Candidates ve Voting Sessions tabloları
 import { eq } from "drizzle-orm";
 import { useUser } from "@clerk/nextjs";
 
 let socket;
 
-export default function VotingSession({ params }: { params: { id: string } }) {
+export default function VotingSession({ params }) {
   const [candidateList, setCandidateList] = useState([]);
   const [votes, setVotes] = useState({});
+  const [timeLeft, setTimeLeft] = useState(null);
+  const [isVotingAllowed, setIsVotingAllowed] = useState(true);
   const { id } = params;
   const { user } = useUser();
 
   useEffect(() => {
     if (!id) return;
 
-    const fetchCandidates = async () => {
+    const fetchSessionData = async () => {
+      const sessionData = await db
+        .select()
+        .from(votingSessions)
+        .where(eq(votingSessions.id, id));
+
+      if (sessionData.length > 0) {
+        const expiresAt = new Date(sessionData[0].expiresAt);
+        const now = new Date();
+
+        // Kalan süreyi hesapla
+        const difference = expiresAt - now;
+        if (difference > 0) {
+          setTimeLeft(difference);
+        } else {
+          setIsVotingAllowed(false);
+        }
+      }
+
       const candidateData = await db
         .select()
         .from(candidates)
@@ -25,32 +45,57 @@ export default function VotingSession({ params }: { params: { id: string } }) {
       setCandidateList(candidateData);
     };
 
-    fetchCandidates();
+    fetchSessionData();
   }, [id]);
 
-  // Socket.IO ile odaya bağlanma
+  useEffect(() => {
+    if (timeLeft === null) return;
+
+    if (timeLeft <= 0) {
+      setIsVotingAllowed(false);
+      return;
+    }
+
+    const timer = setInterval(() => {
+      setTimeLeft((prevTime) => {
+        if (prevTime - 1000 <= 0) {
+          clearInterval(timer);
+          setIsVotingAllowed(false);
+          return 0;
+        }
+        return prevTime - 1000;
+      });
+    }, 1000);
+
+    return () => clearInterval(timer);
+  }, [timeLeft]);
+
   useEffect(() => {
     if (!id) return;
 
-    // Socket bağlantısı
     socket = io();
 
-    // Odaya katıl
     socket.emit("joinRoom", id);
 
-    // Oy güncellemeleri dinleme
     socket.on("voteUpdate", (updatedVotes) => {
-      setVotes(updatedVotes); // Sunucudan gelen güncellenmiş oyları al
+      setVotes(updatedVotes);
+    });
+
+    socket.on("voteError", (message) => {
+      alert(message);
     });
 
     return () => {
-      socket.disconnect(); // Sayfa kapatıldığında socket bağlantısını sonlandır
+      socket.disconnect();
     };
   }, [id]);
 
-  // Oy kullanma işlemi
   const handleVote = (candidateId) => {
-    // Sunucuya oy kullanma isteği gönder
+    if (!isVotingAllowed) {
+      alert("Voting session has ended.");
+      return;
+    }
+
     socket.emit("castVote", { sessionId: id, candidateId, userId: user.id });
   };
 
@@ -59,6 +104,12 @@ export default function VotingSession({ params }: { params: { id: string } }) {
       <h1 className="text-3xl font-bold text-center mb-8">
         Vote for your Favorite Candidate
       </h1>
+      {timeLeft !== null && (
+        <p className="text-center text-xl mb-4">
+          Time remaining: {Math.floor(timeLeft / 60000)}m{" "}
+          {Math.floor((timeLeft % 60000) / 1000)}s
+        </p>
+      )}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {candidateList.map((candidate) => (
           <div
@@ -71,7 +122,10 @@ export default function VotingSession({ params }: { params: { id: string } }) {
             </p>
             <button
               onClick={() => handleVote(candidate.id)}
-              className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+              className={`bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded ${
+                !isVotingAllowed ? "opacity-50 cursor-not-allowed" : ""
+              }`}
+              disabled={!isVotingAllowed}
             >
               Vote
             </button>
