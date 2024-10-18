@@ -24,6 +24,7 @@ app.prepare().then(() => {
     socket.on("joinRoom", (sessionId) => {
       socket.join(sessionId);
       console.log(`Client joined room: ${sessionId}`);
+      io.to(sessionId).emit("voteUpdate", votesCount);
     });
 
     // Oy kullanma işlemi
