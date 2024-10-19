@@ -4,7 +4,9 @@ import { useUser } from "@clerk/nextjs";
 import { useState } from "react";
 import { db } from "@/db";
 import { candidates, votingSessions } from "@/db/schema";
+import { useRouter } from "next/navigation";
 export default function CreateVotingSession() {
+  const router = useRouter();
   const { user } = useUser();
   const [candidateCount, setCandidateCount] = useState(1);
   const [candidateList, setCandidateList] = useState([""]);
@@ -42,7 +44,11 @@ export default function CreateVotingSession() {
       name, // Adayın ismi
     }));
 
-    await db.insert(candidates).values(candidateData);
+    await db
+      .insert(candidates)
+      .values(candidateData)
+      .returning({ id: candidates.id });
+    router.replace(`session/${sessionId}`);
   };
 
   return (

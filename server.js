@@ -15,8 +15,6 @@ app.prepare().then(() => {
   const httpServer = createServer(handler);
   const io = new Server(httpServer);
 
-  // Oylama durumunu tutan nesne
-
   io.on("connection", (socket) => {
     socket.on("joinRoom", (sessionId) => {
       socket.join(sessionId);

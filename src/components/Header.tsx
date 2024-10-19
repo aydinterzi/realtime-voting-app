@@ -23,6 +23,9 @@ export default function Header() {
             <Link href="/" className="text-gray-600 hover:text-blue-600">
               Sessions
             </Link>
+            <Link href="/create" className="text-gray-600 hover:text-blue-600">
+              Create
+            </Link>
             <div>
               <ModeToggle />
             </div>
@@ -61,18 +64,18 @@ export default function Header() {
           <nav className="md:hidden mt-4">
             <div className="flex flex-col space-y-4 text-center">
               <Link
-                href="/projects"
+                href="/"
                 className="text-gray-600 hover:text-blue-600"
                 onClick={() => setIsMenuOpen(false)}
               >
-                Projeler
+                Sessions
               </Link>
               <Link
-                href="/messages"
+                href="/create"
                 className="text-gray-600 hover:text-blue-600"
                 onClick={() => setIsMenuOpen(false)}
               >
-                Mesajlar
+                Create
               </Link>
             </div>
           </nav>
