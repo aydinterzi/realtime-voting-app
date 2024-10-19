@@ -20,6 +20,8 @@ app.prepare().then(() => {
   io.on("connection", (socket) => {
     socket.on("joinRoom", (sessionId) => {
       socket.join(sessionId);
+      console.log(`Client joined room: ${sessionId}`);
+      io.to(sessionId).emit("voteUpdate", votesCount);
       console.log(`Client ${socket.id} joined room ${sessionId}`);
 
       // Client odaya katıldığında mevcut oy durumu gönder
